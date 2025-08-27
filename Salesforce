@@ -69,7 +69,7 @@
 						},
 						{
 							"key": "client_secret",
-							"value": "FA2926F9DE01892EC6AC8B81BFF26543D9F1EE8DF54F83762169EAF3A1394369",
+							"value": "*********************************",
 							"type": "text"
 						},
 						{
@@ -79,7 +79,7 @@
 						},
 						{
 							"key": "password",
-							"value": "HelloSalesforce@123",
+							"value": "********",
 							"type": "text"
 						}
 					]
