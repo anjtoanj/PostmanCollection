@@ -1,0 +1,687 @@
+{
+	"info": {
+		"_postman_id": "5a033973-efed-4c07-b59a-6d047187ca7d",
+		"name": "ForPlaywright_Salesforce",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25445294"
+	},
+	"item": [
+		{
+			"name": "Generate OAuth Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let jsonData = pm.response.json();\r",
+							"if (jsonData.access_token) {\r",
+							"    pm.environment.set(\"access_token\", jsonData.access_token);\r",
+							"    pm.environment.set(\"instance_url\", jsonData.instance_url);\r",
+							"    console.log(\"Access token saved to environment\");\r",
+							"} else {\r",
+							"    console.log(\"Failed to retrieve access token\", jsonData);\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "grant_type",
+							"value": "password",
+							"type": "text"
+						},
+						{
+							"key": "client_id",
+							"value": "3MVG95mg0lk4batgGmraH4prOsZHuufU6eNXzyRaB4Q98sk_lfONZ0A_wgxPbK7bPbh5WNu41yvm3oT2OHzlB",
+							"type": "text"
+						},
+						{
+							"key": "client_secret",
+							"value": "FA2926F9DE01892EC6AC8B81BFF26543D9F1EE8DF54F83762169EAF3A1394369",
+							"type": "text"
+						},
+						{
+							"key": "username",
+							"value": "thanmayi321@gmail.com",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "HelloSalesforce@123",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{login_url}}/services/oauth2/token",
+					"host": [
+						"{{login_url}}"
+					],
+					"path": [
+						"services",
+						"oauth2",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all Leads",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test for exact value of access_token\r",
+							"    const responseBody = pm.response.json();\r",
+							"pm.test(\"Get first id\", function () {\r",
+							"\r",
+							"    // Set collection variable\r",
+							"    pm.collectionVariables.set(\"Lead_id\", responseBody.recentItems[0].Id);   // Save ID as collection variable\r",
+							"    console.log(\"First Lead ID: \" + responseBody.recentItems[0].Id);\r",
+							"});\r",
+							"\r",
+							"// Get count of IDs\r",
+							"let count = responseBody.recentItems ? responseBody.recentItems.length : 0;\r",
+							"console.log(\"Number of Lead IDs:\", count);\r",
+							"\r",
+							"// Optionally store count in collection variable\r",
+							"pm.collectionVariables.set(\"Lead_count\", count);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{instance_url}}/services/data/v58.0/sobjects/Lead",
+					"host": [
+						"{{instance_url}}"
+					],
+					"path": [
+						"services",
+						"data",
+						"v58.0",
+						"sobjects",
+						"Lead"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get first 50 Lead in the Lead list",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let response = pm.response.json(); // Parses the API Response\r",
+							"let ids = response.records.map(r => r.Id); //Extracts the Id Field from Each Reco - Iterates over records in the response and collects only the Id values.\r",
+							"pm.environment.set(\"leads_ids\", JSON.stringify(ids)); //Saves the array of IDs (converted to JSON string) in the environment for use in subsequent requests.\r",
+							"\r",
+							"// SOQL stands for Salesforce Object Query Language.\r",
+							"// Here query parameter SOQL =SELECT+Id+FROM+Lead+LIMIT+40\r",
+							"\r",
+							"\r",
+							"// Count\r",
+							"let count = ids.length;\r",
+							"\r",
+							"console.log(\"Number of Leads:\", count);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{instance_url}}/services/data/v58.0/query?q=SELECT+Id+FROM+Lead+LIMIT+20",
+					"host": [
+						"{{instance_url}}"
+					],
+					"path": [
+						"services",
+						"data",
+						"v58.0",
+						"query"
+					],
+					"query": [
+						{
+							"key": "q",
+							"value": "SELECT+Id+FROM+Lead+LIMIT+20"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Retrieve the Lead Created",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{Access_Token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{instance_url}}/services/data/v58.0/sobjects/Lead/{{Lead_id}}",
+					"host": [
+						"{{instance_url}}"
+					],
+					"path": [
+						"services",
+						"data",
+						"v58.0",
+						"sobjects",
+						"Lead",
+						"{{Lead_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update the Lead",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{Access_Token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"Salutation\": \"Ms.\",\r\n    \"Company\": \"Qeagle\"\r\n\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{instance_url}}/services/data/v58.0/sobjects/Lead/{{Lead_id}}",
+					"host": [
+						"{{instance_url}}"
+					],
+					"path": [
+						"services",
+						"data",
+						"v58.0",
+						"sobjects",
+						"Lead",
+						"{{Lead_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete the Lead",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// let ids = JSON.parse(pm.environment.get(\"lead_ids\") || \"[]\");\r",
+							"\r",
+							"// if (ids.length > 0) {\r",
+							"//     let id = ids.pop();  // Take one ID\r",
+							"//     pm.environment.set(\"leadId\", id);\r",
+							"//     pm.environment.set(\"lead_ids\", JSON.stringify(ids)); // Update remaining\r",
+							"// } else {\r",
+							"//     pm.setNextRequest(null); // Stop run if no IDs left\r",
+							"// }\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{Access_Token}}",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"ids\": {{lead_ids}},\r\n  \"allOrNone\": false\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{instance_url}}/services/data/v58.0/sobjects/Lead/00QJ2000005Va24MAC",
+					"host": [
+						"{{instance_url}}"
+					],
+					"path": [
+						"services",
+						"data",
+						"v58.0",
+						"sobjects",
+						"Lead",
+						"00QJ2000005Va24MAC"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Composite Delete",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let ids = JSON.parse(pm.environment.get(\"lead_ids\") || \"[]\");\r",
+							"\r",
+							"// Take first 25 IDs for this batch\r",
+							"let batchIds = ids.splice(0, 20); \r",
+							"pm.environment.set(\"lead_ids\", JSON.stringify(ids)); // remaining IDs\r",
+							"\r",
+							"let batchRequests = batchIds.map(id => ({\r",
+							"    method: \"DELETE\",\r",
+							"    url: `/services/data/v57.0/sobjects/Lead/${id}`\r",
+							"}));\r",
+							"\r",
+							"if (batchRequests.length === 0) {\r",
+							"    throw new Error(\"Batch requests array is empty! Cannot send to Salesforce.\");\r",
+							"}\r",
+							"\r",
+							"// Set batch_body environment variable\r",
+							"pm.environment.set(\"batch_body\", JSON.stringify({\r",
+							"    batchRequests: batchRequests,\r",
+							"    haltOnError: false\r",
+							"}));\r",
+							"\r",
+							"console.log(\"Batch Requests Count:\", batchRequests.length);\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{Access_Token}}",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{{batch_body}}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{instance_url}}/services/data/v57.0/composite/batch",
+					"host": [
+						"{{instance_url}}"
+					],
+					"path": [
+						"services",
+						"data",
+						"v57.0",
+						"composite",
+						"batch"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get the updated Lead",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{Access_Token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{SalesforceApp}}/services/data/v58.0/sobjects/Lead/{{Lead_id}}",
+					"host": [
+						"{{SalesforceApp}}"
+					],
+					"path": [
+						"services",
+						"data",
+						"v58.0",
+						"sobjects",
+						"Lead",
+						"{{Lead_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create a Lead",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//Save the response in a variable\r",
+							"var resp = pm.response.json();\r",
+							"//Extract id from the response\r",
+							"var id = resp.id;\r",
+							"//Save id as global variable\r",
+							"pm.globals.set(\"ID\", id);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{Access_Token}}",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "Content-Type",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"FirstName\":\"{{$randomFirstName}}\",\r\n    \"LastName\": \"{{$randomLastName}}\",\r\n    \"Company\": \"{{$randomCompanyName}}\",\r\n    \"Email\": \"{{$randomEmail}}\"\r\n\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{instance_url}}/services/data/v58.0/sobjects/Lead",
+					"host": [
+						"{{instance_url}}"
+					],
+					"path": [
+						"services",
+						"data",
+						"v58.0",
+						"sobjects",
+						"Lead"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					"const client_id = pm.environment.get(\"client_id\");\r",
+					"const client_secret = pm.environment.get(\"client_secret\");\r",
+					"const username = pm.environment.get(\"username\");\r",
+					"const password = pm.environment.get(\"password\");\r",
+					"const login_url = pm.environment.get(\"login_url\"); // e.g., https://login.salesforce.com/services/oauth2/token\r",
+					"\r",
+					"pm.sendRequest({\r",
+					"    url: login_url,\r",
+					"    method: 'POST',\r",
+					"    header: {\r",
+					"        'Content-Type': 'application/x-www-form-urlencoded'\r",
+					"    },\r",
+					"    body: {\r",
+					"        mode: 'urlencoded',\r",
+					"        urlencoded: [\r",
+					"            {key: \"grant_type\", value: \"password\"},\r",
+					"            {key: \"client_id\", value: client_id},\r",
+					"            {key: \"client_secret\", value: client_secret},\r",
+					"            {key: \"username\", value: username},\r",
+					"            {key: \"password\", value: password}\r",
+					"        ]\r",
+					"    }\r",
+					"}, function (err, res) {\r",
+					"    if (err) {\r",
+					"        console.log(\"Token request failed: \", err);\r",
+					"    } else {\r",
+					"        let jsonData = res.json();\r",
+					"        pm.environment.set(\"access_token\", jsonData.access_token);\r",
+					"    }\r",
+					"});\r",
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "Access_Token",
+			"value": "0",
+			"disabled": true
+		},
+		{
+			"key": "SalesforceApp",
+			"value": "https://enhanceconsultancy-dev-ed.develop.my.salesforce.com",
+			"disabled": true
+		},
+		{
+			"key": "Lead_id",
+			"value": "0",
+			"disabled": true
+		},
+		{
+			"key": "Lead_id",
+			"value": ""
+		},
+		{
+			"key": "Lead_count",
+			"value": ""
+		}
+	]
+}
