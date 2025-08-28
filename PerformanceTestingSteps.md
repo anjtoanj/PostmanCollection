@@ -96,3 +96,64 @@ Rule of Thumb
 100–500 iterations per job → safe and fast
 500–5000 iterations per job → monitor memory and CI runtime
 >5000 iterations → use matrix/parallel jobs
+-------------------------------------------------------------------
+# ParallelPerformance.yml
+*******************************
+1. Matrix Strategy
+name: API Performance Test
+on: push
+jobs:
+  performance-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        parallel-job: [1, 2, 3, 4]   # 4 parallel jobs
+
+GitHub creates 4 separate jobs, one for each value in the matrix (1, 2, 3, 4).
+All 4 jobs run in parallel on separate Ubuntu runners (ubuntu-latest).
+Each job gets its own isolated VM with 2 CPUs, 7 GB RAM, and a clean environment.
+
+*******************************
+2. Checkout Step
+- uses: actions/checkout@v3
+
+Pulls your repository into each job’s runner.
+Each job operates independently, so each has a separate copy of your code and Postman collection.
+*******************************
+3. How the Jobs Run
+
+Job 1 → runs on Ubuntu VM 1
+Job 2 → runs on Ubuntu VM 2
+Job 3 → runs on Ubuntu VM 3
+Job 4 → runs on Ubuntu VM 4
+You can add Newman commands in each job to run a subset of iterations.
+Each job can generate its own HTML/JSON report.
+*******************************
+4. Example with Newman
+- name: Run Performance Test
+  run: |
+    mkdir -p newman
+    echo "Running job ${{ matrix.parallel-job }}"
+    newman run cat-api-performance.json \
+      --iteration-count 25 \
+      --reporters cli,html \
+      --reporter-html-export newman/report-${{ matrix.parallel-job }}.html
+
+
+Iteration split: Each job runs 25 iterations → total 100 iterations across 4 jobs.
+Reports: Each job produces report-1.html, report-2.html, etc.
+*******************************
+5. Upload Artifacts
+- name: Upload Test Report
+  uses: actions/upload-artifact@v3
+  with:
+    name: performance-report-${{ matrix.parallel-job }}
+    path: newman/report-${{ matrix.parallel-job }}.html
+
+Each job uploads its report independently.
+*******************************
+After workflow finishes, you can download all 4 reports from the Actions artifacts tab.
+_Matrix creates parallel jobs on GitHub-hosted runners.
+Each job is isolated, runs independently, and can run a portion of your Newman iterations.
+Reports are generated per job, giving you a pseudo-concurrent load test._
+*******************************
