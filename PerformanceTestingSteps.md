@@ -157,3 +157,59 @@ _Matrix creates parallel jobs on GitHub-hosted runners.
 Each job is isolated, runs independently, and can run a portion of your Newman iterations.
 Reports are generated per job, giving you a pseudo-concurrent load test._
 *******************************
+
+# To run Postman Newman performance tests in Azure DevOps, you create a pipeline using either a YAML file or a classic pipeline. Below is a YAML-based setup.
+
+1. Prerequisites
+Azure DevOps project created.
+Postman collection (cat-api-performance.json) and environment files (optional) stored in the repo.
+Newman installed in pipeline (via npm).
+
+2. Sample Azure DevOps Pipeline (YAML)
+trigger:
+- main   # or your target branch
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+jobs:
+- job: PerformanceTest
+  displayName: 'API Performance Test with Newman'
+  strategy:
+    parallel: 4     # Runs 4 parallel jobs
+  steps:
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '18.x'
+    displayName: 'Install Node.js'
+
+  - script: |
+      npm install -g newman
+      mkdir -p newman
+    displayName: 'Install Newman'
+
+  - script: |
+      newman run cat-api-performance.json \
+        --iteration-count 100 \
+        --reporters cli,html \
+        --reporter-html-export newman/report_$(System.JobAttempt).html
+    displayName: 'Run Performance Test'
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: 'newman'
+      ArtifactName: 'performance-report'
+      publishLocation: 'Container'
+    displayName: 'Publish Test Report'
+
+# Key Points
+strategy.parallel: 4 → Runs the job in parallel to simulate multiple users.
+Artifacts → HTML report is published and accessible from Azure DevOps pipeline summary.
+Iteration Count → Adjust as per load requirements (100, 500, 1000, etc.), but keep in mind agent limits.
+
+# Best Practices for Load Testing
+Use self-hosted agents for higher load, as Microsoft-hosted agents have CPU/memory limits.
+Split collection into smaller sets or multiple jobs if simulating thousands of requests.
+Monitor API response times and failures via --reporters cli,html,json.
+
+*******************************
