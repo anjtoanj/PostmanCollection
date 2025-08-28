@@ -2,7 +2,7 @@ name: API Performance Test
 on: push
 jobs:
   performance-test:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     strategy:
       matrix:
         parallel-job: [1, 2, 3, 4]   # 4 parallel jobs
