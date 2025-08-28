@@ -2,7 +2,7 @@ name: API Performance Test
 on: push
 jobs:
   performance-test:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
