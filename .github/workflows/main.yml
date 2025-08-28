@@ -1,0 +1,20 @@
+name: API Performance Test
+on: push
+jobs:
+  performance-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Newman
+        run: npm install -g newman
+      - name: Run Performance Test
+        run: |
+          newman run cat-api-performace.json \
+          --iteration-count 100 \
+          --reporters cli,html \
+          --reporter-html-export newman/report.html
+      - name: Upload Test Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: performance-report
+          path: newman/report.html
