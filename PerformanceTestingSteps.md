@@ -57,3 +57,42 @@ Start-Process "newman" -ArgumentList 'run "cat-api-performance.json" --iteration
           --iteration-count 100 \
           --reporters cli,html \
           --reporter-html-export newman/report.html
+
+# Newman itself does not impose a hard maximum iteration count. The limit depends on system resources and CI environment constraints.
+
+1. Newman Limits
+No built-in iteration cap: --iteration-count can be very large (1000, 10000…).
+Memory usage increases with iteration count, especially if:
+You store large responses
+You generate reports (HTML/JSON)
+Your collection has many requests or heavy scripts
+
+2. CI/CD Runner Limits
+GitHub-Hosted Runners
+Each job has:
+2-core CPU
+7 GB RAM
+6-hour maximum runtime per job
+
+Practical limit:
+10,000+ iterations may run, but could hit memory or timeout issues.
+Recommended to split into parallel jobs using matrix strategy for large loads.
+
+Self-Hosted Runners
+Limited only by your machine’s CPU, RAM, and disk.
+You can theoretically run millions of iterations if resources allow.
+
+3. Best Practices for CI
+Avoid huge single jobs → split into parallel Newman jobs.
+Use --delay-request for better simulation of real users.
+
+Monitor memory and runtime; CI may cancel jobs that exceed time/memory.
+Limit HTML/JSON reporting for very large iteration counts:
+_newman run collection.json --iteration-count 5000 --reporters cli_
+
+Generate HTML/JSON for smaller sample runs if needed.
+Rule of Thumb
+
+100–500 iterations per job → safe and fast
+500–5000 iterations per job → monitor memory and CI runtime
+>5000 iterations → use matrix/parallel jobs
