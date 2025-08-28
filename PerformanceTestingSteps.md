@@ -50,3 +50,10 @@ Windows (PowerShell):
 Start-Process "newman" -ArgumentList 'run "cat-api-performance.json" --iteration-count 50'
 Start-Process "newman" -ArgumentList 'run "cat-api-performance.json" --iteration-count 50'
 
+# To run alongwith env variables
+        run: |
+          newman run cat-api-performace.json \
+          -e CatAPI.postman_environment.json \
+          --iteration-count 100 \
+          --reporters cli,html \
+          --reporter-html-export newman/report.html
