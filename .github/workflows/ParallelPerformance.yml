@@ -1,0 +1,33 @@
+name: API Performance Test
+on: push
+jobs:
+  performance-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        parallel-job: [1, 2, 3, 4]   # 4 parallel jobs
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install Newman
+        run: npm install -g newman
+
+      - name: Run Performance Test
+        run: |
+          mkdir -p newman
+          echo "Running job ${{ matrix.parallel-job }}"
+          newman run cat-api-performance.json \
+          --iteration-count 25 \
+          --reporters cli,html \
+          --reporter-html-export newman/report-${{ matrix.parallel-job }}.html
+
+      - name: Upload Test Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: performance-report-${{ matrix.parallel-job }}
+          path: newman/report-${{ matrix.parallel-job }}.html
