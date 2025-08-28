@@ -43,4 +43,10 @@ newman run "cat-api-performance.json" --iteration-count 50
 Each instance simulates a separate user
 Combine results manually or with HTML reports
 
+# Simulate Concurrency (Pseudo Load Testing)
+
+_Newman itself is sequential, but you can simulate concurrency by running multiple Newman processes:_
+Windows (PowerShell):
+Start-Process "newman" -ArgumentList 'run "cat-api-performance.json" --iteration-count 50'
+Start-Process "newman" -ArgumentList 'run "cat-api-performance.json" --iteration-count 50'
 
