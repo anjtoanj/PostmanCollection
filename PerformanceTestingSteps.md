@@ -7,7 +7,7 @@ cat-api-performance.json
  node -v
  npm -v
  newman install
-7. run the collection in newman
+7. _Run the collection in newman_
    newman run
   
    newman run "cat-api-performance.json" --reporters cli,html --reporter-html-export "report.html"  
