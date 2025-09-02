@@ -108,6 +108,37 @@ steps:
     publishLocation: 'Container'
   displayName: 'Publish Newman HTML Report'
 -------------------------------------------------------------------------------------
+# To run collections in parallel
+Here’s a full YAML example for GitHub Actions, splitting 100 iterations across 5 parallel jobs:
+
+🧾 .github/workflows/newman-parallel.yml
+name: Newman Parallel Test
+on:
+  push:
+    branches: [ main ]
+jobs:
+  newman-parallel:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        chunk: [1, 2, 3, 4, 5]  # 5 parallel runs
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18' 
+      - name: Install Newman
+        run: npm install -g newman
+      - name: Run Newman Collection (20 iterations each)
+        run: |
+          newman run collection.json \
+            --iteration-count 20 \
+            --environment environment.json \
+            --reporters cli,json \
+            --reporter-json-export results_chunk_${{ matrix.chunk }}.json
+--------------------------------------------------------------------------------------
 4. Senior-Level Talking Points
 
 Thresholds: Configured Newman scripts to fail pipeline if response time >500ms or error rate >1%.
