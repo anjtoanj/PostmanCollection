@@ -3,6 +3,19 @@ As a senior test automation engineer how to explain the implementation in interv
 1. Project Context
 “In one of my recent projects, I implemented a performance testing suite using Postman and Newman for API load testing. 
 The goal was to measure response times, throughput, and error rates under simulated load, and integrate this into our CI/CD pipeline for continuous performance monitoring.”
+NOTE : 
+  - Throughput => how many requests  can be processed in a specific period of time.
+eg: 1000 http request in 10 seconds 
+    Here throughput is 100 RPS
+  - Erorr rate refers to the percentage of requests or txns that fail during the test.
+    Error Rate = (Number of Failed Requests/ Total Requests) *100
+ What counts as an Error?
+   - HTTP 4xx(client error , 404 Not Found ,401 Unauthorized)
+   - HTTP 5xx(server errors, 500 Internal Server Error)
+   - Timeouts (no response wihtin expected time)
+   - Invalid responses (wrong data returend)
+   - Application exceptions (eg: thrown errors in logs)
+   
 -------------------------------------------------------------------------------------
 2. Test Design & Setup
 
